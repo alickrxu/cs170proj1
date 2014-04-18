@@ -1,0 +1,7 @@
+/usr/lib64/qt-3.3/bin:
+/usr/lib64/ccache
+/usr/libexec/lightdm
+/usr/local/bin
+/usr/bin
+/bin
+/usr/local/sbin:/usr/sbin:/usr/lib64/alliance/bin:/usr/libexec/sdcc:/eci/bin:/ece/mentor/modeltech/bin:/ece/mentor/modelsim_6.2/modeltech/linux:/ece/synopsys/synthesis/D-2010.03-SP1/bin/:./:/fs/student/bdphan/bin/:/fs/student/bdphan/bin:/usr/lib64/alliance/bin:/usr/libexec/sdcc:/eci/bin:/ece/mentor/modeltech/bin:/ece/mentor/modelsim_6.2/modeltech/linux:/ece/synopsys/synthesis/D-2010.03-SP1/bin/:./:/fs/student/bdphan/bin/
