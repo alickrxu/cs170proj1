@@ -9,17 +9,11 @@
 #include <ctype.h>
 
 
-#define NORMAL 				00
-#define OUTPUT_REDIRECTION 	11
-#define INPUT_REDIRECTION 	22
-#define PIPELINE 			33
-#define BACKGROUND			44
-#define OUTPUT_APP	55
-
 //parse tokens from mystring
-int  parse_token(char *mystring, char **tokens)
+int  parse_token(char *myInputString, char **tokens, int *mode, char **extra_tokens)
 {
   int numTokens=0;
+  char *mystring = myInputString;
   while (*mystring != '\0') //check if end of string
     {
       *tokens = mystring;
@@ -27,6 +21,43 @@ int  parse_token(char *mystring, char **tokens)
       while (*mystring != '\0' && *mystring != ' ' && *mystring != '\n' && *mystring != '\t') 
 	{
 	  //switch statement for dealing with i/o redirection, piping, and &
+	  switch (*mystring)
+	    {
+	    case '&':  
+	      {
+		*mode = 1; //run in background
+		break;
+	      }
+	    case '>':
+	      {
+		*mode = 2; //output redirection
+		*tokens = '\0';
+		mystring++;
+		while (*mystring == ' ' || *mystring == '\t')
+		  mystring++;
+		*extra_tokens=mystring; //extra_tokens holds rest of the command line argument after '>'
+
+	      }
+	    case '<':
+	      {
+		*mode = 3; //input redirection
+		*tokens = '\0';
+		mystring++;
+		while (*mystring == ' ' || *mystring == '\t')
+		  mystring++;
+		*extra_tokens=mystring; //extra_tokens holds rest of the command line argument after '<'
+	      }
+	    case '|':
+	      {
+		*mode = 4; //pipe
+		*tokens = '\0';
+		mystring++;
+		while (*mystring == ' ' || *mystring == '\t')
+		  mystring++;
+		*extra_tokens=mystring; //extra_tokens holds rest of the command line argument after '|'
+	      }
+
+	    }
 	  mystring++;
 	}
       while (*mystring == ' ' || *mystring == '\n' || *mystring == '\t')
@@ -86,14 +117,17 @@ int main (int argc, char *argv[])
 
   int child_pid;
   char mystring[1024];
-  char *tokens [100];
-  int numTokens;
+  char *tokens [100]; //using 100 for max length of string input size
+  char *extra_tokens = NULL;
+  int numExecutions;
   int i;
   int alnum;
-  int mode;
+  int mode = 0; //0 for standard shell operation
+	signal (SIGINT, SIG_IGN);
   while (1)
     {
       printf ("sish:> ");
+
       if (fgets(mystring, 1024, stdin) == NULL)
 	{
 	  break;
@@ -118,7 +152,7 @@ int main (int argc, char *argv[])
 	}	  
       if (alnum == 0)
 	continue;
-      numTokens = parse_token(mystring, tokens);
+      numExecutions = parse_token(mystring, tokens, &extra_tokens, &mode);
       printf ("mystring: %s\n", mystring);
       printf ("tokens are: ");
       
