@@ -1,5 +1,4 @@
 /*Brian Phan, Alick Xu*/
-//#! shell
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -9,11 +8,22 @@
 #include <ctype.h>
 
 
+/*
+  meaning of mode:
+	0 = normal
+	1 = &
+	2 = <
+	3 = >
+	4 = |
+*/
 //parse tokens from mystring
+//return an array of individual words
 int  parse_token(char *myInputString, char **tokens, int *mode, char **extra_tokens)
 {
   int numTokens=0;
   char *mystring = myInputString;
+
+  mode = 0; //initially, in normal mode
   while (*mystring != '\0') //check if end of string
     {
       *tokens = mystring;
@@ -67,6 +77,7 @@ int  parse_token(char *myInputString, char **tokens, int *mode, char **extra_tok
 	}
       tokens++;
     }
+  //end of string
   *tokens='\0';
   return numTokens;
 }
@@ -127,7 +138,6 @@ int main (int argc, char *argv[])
   while (1)
     {
       printf ("sish:> ");
-
       if (fgets(mystring, 1024, stdin) == NULL)
 	{
 	  break;
@@ -152,7 +162,9 @@ int main (int argc, char *argv[])
 	}	  
       if (alnum == 0)
 	continue;
+
       numExecutions = parse_token(mystring, tokens, &extra_tokens, &mode);
+
       printf ("mystring: %s\n", mystring);
       printf ("tokens are: ");
       
