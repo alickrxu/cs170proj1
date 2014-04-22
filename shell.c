@@ -85,21 +85,49 @@ int  parse_token(char *myInputString, char **tokens, int *mode, char **extra_tok
 
 
 // Read the parsed string and execute the command
-int  execute(char **tokens)
+int  execute(char **tokens, int mode)
 {
-  pid_t  child_pid;
+  pid_t  child_pid, child_pid_2;
   int    status;
   if ((child_pid = fork()) < 0) {     /* fork a child process           */
     printf("ERROR: forking child process failed\n");
     exit(1);
   }
   else if (child_pid == 0) {          /* for the child process:         */
-    if (execvp(*tokens, tokens) < 0) {     /* execute the command  */
-      printf("ERROR: %s is an invalid command \n", tokens[0]);
-      exit(1);
-    }
+	switch(mode)
+	{
+		case 2:
+			fp = fopen(*supplementPtr, "w+");
+			dup2(fileno(fp), 1);
+			break;
+		/*case OUTPUT_APP:
+			fp = fopen(*supplementPtr, "a");
+			dup2(fileno(fp), 1);
+			break;
+		*/
+		case 3:
+			fp = fopen(*supplementPtr, "r");
+			dup2(fileno(fp), 0);
+			break;
+		case 4:
+			close(myPipe[0]);		//close input of pipe
+			dup2(myPipe[1], fileno(stdout));
+			close(myPipe[1]);
+			break;
+	}
+    	if (execvp(*tokens, tokens) < 0) {     /* execute the command  */
+      	printf("ERROR: %s is an invalid command \n", tokens[0]);
+      	exit(1);
+    	}
   }
   else {                                  /* for the parent:      */
+	if (mode == 1)
+		; //background
+	else if (mode == 4)
+	{
+		waitpid (child_pid, &status, 0);
+		child_pid_2 = fork();
+		if (child_pid_2 < 0)
     //while (wait(&status) != child_pid);      /* wait for completion  */
     waitpid(child_pid, &status, 0);
     return 0;
@@ -183,7 +211,7 @@ int main (int argc, char *argv[])
 	}
       else
 	{
-	  execute (tokens); //otherwise, execute command
+	  execute (tokens, mode); //otherwise, execute command
 	}
     } //end of while
   printf("exited while\n");
